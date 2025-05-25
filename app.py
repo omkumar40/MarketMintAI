@@ -1,4 +1,6 @@
 import streamlit as st
+st.set_page_config(layout="wide", page_title="AI Marketing Content Generator PoC")
+
 from PIL import Image
 import io
 import base64
@@ -21,6 +23,14 @@ api_key = st.sidebar.text_input("Gemini API Key", type="password", value=st.sess
 if api_key and api_key != st.session_state["GEMINI_API_KEY"]:
     st.session_state["GEMINI_API_KEY"] = api_key
     os.environ["GEMINI_API_KEY"] = api_key
+
+# --- Streamlit UI ---
+st.title("AI Marketing Content Generator (PoC)")
+
+# Only proceed if API key is provided
+if not st.session_state["GEMINI_API_KEY"]:
+    st.info("Please enter your Gemini API Key in the sidebar to start.")
+    st.stop()
 
 try:
     os.environ["GEMINI_API_KEY"] = st.session_state["GEMINI_API_KEY"]
@@ -129,12 +139,6 @@ def generate_image(prompt, image_base64=None):
             return None, None
 
 
-# --- Streamlit UI ---
-st.set_page_config(layout="wide", page_title="AI Marketing Content Generator PoC")
-
-st.title("AI Marketing Content Generator (PoC)")
-
-
 # --- Input Section ---
 st.sidebar.header("Inputs")
 
@@ -213,9 +217,6 @@ The final image should be 1920x1080 pixels.
 
         except Exception as e:
             st.error(f"API call failed for Product Banner: {e}")
-            st.warning(
-                "This typically happens because the model does not support image generation/integration via this specific API call."
-            )
 
     # --- Task 2: Human Model with Product ---
     st.subheader("2. Human Model with Product in Two Poses")
