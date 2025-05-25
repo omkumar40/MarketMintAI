@@ -47,6 +47,12 @@ pip install -r requirements.txt
 ## Setup
 
 1. **Clone this repository**
+
+```bash
+git clone https://github.com/omkumar40/MarketMintAI
+cd MarketMintAI
+```
+
 2. **Install dependencies** (see above)
 3. **Get a Gemini API Key** from Google AI Studio
 4. **Run the app:**
