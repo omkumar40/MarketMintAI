@@ -1,6 +1,13 @@
 import streamlit as st
 st.set_page_config(layout="wide", page_title="AI Marketing Content Generator PoC")
 
+import time
+
+# --- Custom Exception ---
+class APIGenerationError(Exception):
+    """Custom exception for API related errors during image generation."""
+    pass
+
 from PIL import Image
 import io
 import base64
@@ -23,6 +30,15 @@ api_key = st.sidebar.text_input("Gemini API Key", type="password", value=st.sess
 if api_key and api_key != st.session_state["GEMINI_API_KEY"]:
     st.session_state["GEMINI_API_KEY"] = api_key
     os.environ["GEMINI_API_KEY"] = api_key
+
+st.sidebar.markdown(
+    """
+    <small>Note: If you encounter errors related to API usage, quotas, 
+    or key exhaustion, please check your API provider's dashboard 
+    for your current usage status and limits.</small>
+    """,
+    unsafe_allow_html=True,
+)
 
 # --- Streamlit UI ---
 st.title("AI Marketing Content Generator (PoC)")
@@ -135,8 +151,23 @@ def generate_image(prompt, image_base64=None):
             file_extension = mimetypes.guess_extension(inline_data.mime_type)
             return data_buffer, file_extension
         else:
-            st.write(chunk.text)
-            return None, None
+            # Check for API errors in chunk.text
+            # error_keywords = ["API key", "quota", "exhausted", "error", "failed"]
+            # if any(keyword in chunk.text.lower() for keyword in error_keywords):
+            #     raise APIGenerationError(f"API Error: {chunk.text}")
+            # Check for API errors in chunk.text
+            # error_keywords = ["API key", "quota", "exhausted", "error", "failed"]
+            # if any(keyword in chunk.text.lower() for keyword in error_keywords):
+            #     raise APIGenerationError(f"API Error: {chunk.text}")
+            # Check for API errors in chunk.text
+            error_keywords = ["API key", "quota", "exhausted", "error", "failed"]
+            if any(keyword in chunk.text.lower() for keyword in error_keywords):
+                raise APIGenerationError(f"API Error: {chunk.text}")
+            else:
+                print(f"API Info for prompt starting with '{prompt[:50]}...': {chunk.text}")
+                # st.write(chunk.text) # Optional: Write non-error text if needed
+                return None, None
+    return None, None # Fallback if loop completes without returning
 
 
 # --- Input Section ---
@@ -210,11 +241,14 @@ The final image should be 1920x1080 pixels.
             # Attempt AI call for Task 1 (Background + Product Integration)
             # Note: Requesting IMAGE output modality
             image_base64 = st.session_state["image_base64"]
+            time.sleep(1)
             image_data_buffer, file_extension = generate_image(
                 banner_prompt, image_base64)
             # Display the response (which will likely be text or failure)
             display_ai_response(image_data_buffer, file_extension, "Product Banner")
 
+        except APIGenerationError as api_e:
+            st.error(f"Product Banner Generation Error: {api_e}")
         except Exception as e:
             st.error(f"API call failed for Product Banner: {e}")
 
@@ -242,9 +276,12 @@ The final image should be 1080x1080 pixels.
             print(prompt_pose1)
             # Attempt AI call for Task 2 Pose 1 (Human + Product Integration)
             image_base64 = st.session_state["image_base64"]
+            time.sleep(1)
             image_data_buffer, file_extension = generate_image(
                 prompt_pose1, image_base64)
             display_ai_response(image_data_buffer, file_extension, "Model Image - Pose 1")
+        except APIGenerationError as api_e:
+            st.error(f"Model Image - Pose 1 Generation Error: {api_e}")
         except Exception as e:
             st.error(f"API call failed for Model Image - Pose 1: {e}")
 
@@ -264,9 +301,12 @@ The final image should be 1080x1080 pixels.
 
                 # Attempt AI call for Task 2 Pose 2 (Human + Product Integration)
                 image_base64 = st.session_state["image_base64"]
+                time.sleep(1)
                 image_data_buffer, file_extension = generate_image(
                     prompt_pose2, image_base64)
                 display_ai_response(image_data_buffer, file_extension, "Model Image - Pose 2")
+            except APIGenerationError as api_e:
+                st.error(f"Model Image - Pose 2 Generation Error: {api_e}")
             except Exception as e:
                 st.error(f"API call failed for Model Image - Pose 2: {e}")
 
@@ -319,11 +359,14 @@ Create a complete, ready-to-use ad creative that looks professionally designed.
             try:
                 image_base64 = st.session_state["image_base64"]
                 # Attempt AI call for Ad Creative (Product + Text + Specific Layout/Size - highly challenging for AI)
+                time.sleep(1)
                 image_data_buffer, file_extension = generate_image(
                     ad_creative_prompt, image_base64)
                 display_ai_response(
                     image_data_buffer, file_extension, f"{platform.capitalize()} Ad Creative"
                 )
+            except APIGenerationError as api_e:
+                st.error(f"{platform.capitalize()} Ad Creative Generation Error: {api_e}")
             except Exception as e:
                 st.error(f"API call failed for {platform.capitalize()} Ad Creative: {e}")
                 
