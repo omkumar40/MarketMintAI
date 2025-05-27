@@ -22,7 +22,7 @@ MarketMintAI is a proof-of-concept Streamlit web application that leverages Goog
 
 ## How It Works
 
-1. **Enter your Gemini API Key** in the sidebar (required for AI image generation).
+1. **Enter your Gemini API Key** [API Key](https://aistudio.google.com/app/apikey)  in the sidebar (required for AI image generation).
 2. **Upload a product image** (PNG or JPG).
 3. **Describe the desired marketing scenes** and ad text in the sidebar.
 4. **Click "Generate Marketing Content"** to let the AI attempt to create:
